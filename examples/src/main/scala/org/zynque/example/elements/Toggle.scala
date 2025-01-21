@@ -7,15 +7,15 @@ import org.zynque.tyriancombinators.extensions.*
 // todo: generalize
 // When input == true, displays first counter, when input == false, displays second counter
 class Toggle[F[_]]
-    extends TyrianComponent[
+    extends TyrianElement[
       F,
       Boolean,
       Nothing,
       Boolean,
       (Boolean, Int, Int)
     ] {
-  val incA = CounterButton.Component[F]("Inc A").propagateState
-  val incB = CounterButton.Component[F]("Inc B").propagateState
+  val incA = CounterButton.Element[F]("Inc A").propagateState
+  val incB = CounterButton.Element[F]("Inc B").propagateState
 
   def init: ((Boolean, Int, Int), Cmd[F, Boolean]) = ((true, 0, 0), Cmd.None)
   def update(

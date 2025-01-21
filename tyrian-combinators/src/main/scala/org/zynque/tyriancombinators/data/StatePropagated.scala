@@ -2,16 +2,16 @@ package org.zynque.tyriancombinators.data
 
 import tyrian.*
 
-// Transforms a component into one that always outputs the latest state (ignoring the output of the original component, if any)
+// Transforms an element into one that always outputs its latest state (ignoring the output of the original element, if any)
 class StatePropagated[F[_], I, O, M, S](
-    component: DataComponent[F, I, O, M, S]
-) extends DataComponent[F, I, S, M, S] {
-  override val init: (S, Cmd[F, M]) = component.init
+    element: DataElement[F, I, O, M, S]
+) extends DataElement[F, I, S, M, S] {
+  override val init: (S, Cmd[F, M]) = element.init
   override def update(
       state: S,
       value: Either[I, M]
   ): (S, Cmd[F, Either[S, M]]) = {
-    val (s2, cmd) = component.update(state, value)
+    val (s2, cmd) = element.update(state, value)
     val cmd2 = cmd.map {
       case Left(o)  => Left(s2)
       case Right(m) => Right(m)

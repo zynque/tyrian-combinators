@@ -8,8 +8,8 @@ object Label:
   type State = String
   type Input = String
   
-  class Component[F[_]](initialText: State)
-      extends ConsumerComponent[F, Input, State]:
+  class Element[F[_]](initialText: State)
+      extends ConsumerElement[F, Input, State]:
 
     def initialState = initialText
 

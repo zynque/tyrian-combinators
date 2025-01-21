@@ -9,9 +9,8 @@ object CounterButton:
   enum Msg derives CanEqual:
     case Increment
 
-
-  class Component[F[_]](label: String)
-      extends SimpleStatePropagatorComponent[F, Msg, Int]:
+  class Element[F[_]](label: String)
+      extends SimpleStatePropagatorElement[F, Msg, Int]:
 
     def initSimple = 0
 
@@ -25,10 +24,10 @@ object CounterButton:
         div(state.toString)
       )
 
-object ButtonComponent:
+object ButtonElement:
   enum Msg:
     case Clicked
 
-  class Component[F[_]](label: String) extends ProducerComponent[F, Msg]:
+  class Element[F[_]](label: String) extends ProducerElement[F, Msg]:
     def view(state: Unit): Html[Msg] =
       button(onClick(Msg.Clicked))(label)

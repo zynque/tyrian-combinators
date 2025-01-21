@@ -2,22 +2,22 @@ package org.zynque.tyriancombinators.data
 
 import tyrian.*
 
-// A component that duplicates its output, emitting it twice, once as a Left and once as a Right
+// An element that duplicates its output, emitting it twice, once as a Left and once as a Right
 class Duplicated[F[_], I, O, M, S](
-    component: DataComponent[F, I, O, M, S]
-) extends DataComponent[
+    element: DataElement[F, I, O, M, S]
+) extends DataElement[
       F,
       I,
       Either[O, O],
       M,
       S
     ] {
-  def init: (S, Cmd[F, M]) = component.init
+  def init: (S, Cmd[F, M]) = element.init
   def update(state: S, value: Either[I, M]): (
       S,
       Cmd[F, Either[Either[O, O], M]]
   ) =
-    component.update(state, value) match {
+    element.update(state, value) match {
       case (s, cmd) =>
         val left = cmd.map {
           case Left(o)  => Left(Left(o))

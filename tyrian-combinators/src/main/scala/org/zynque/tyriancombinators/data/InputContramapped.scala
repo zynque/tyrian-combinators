@@ -2,12 +2,12 @@ package org.zynque.tyriancombinators.data
 
 import tyrian.*
 
-// Apply a function to transform the input channel before passing it to the component
+// Apply a function to transform the input channel before passing it to the element
 class InputContramapped[F[_], I, I2, O, M, S](
-    component: DataComponent[F, I, O, M, S],
+    element: DataElement[F, I, O, M, S],
     f: I2 => I
-) extends DataComponent[F, I2, O, M, S] {
-  override val init: (S, Cmd[F, M]) = component.init
+) extends DataElement[F, I2, O, M, S] {
+  override val init: (S, Cmd[F, M]) = element.init
   override def update(
       state: S,
       value: Either[I2, M]
@@ -15,8 +15,8 @@ class InputContramapped[F[_], I, I2, O, M, S](
     value match {
       case Left(i2) =>
         val i = f(i2)
-        component.update(state, Left(i))
+        element.update(state, Left(i))
       case Right(m) =>
-        component.update(state, Right(m))
+        element.update(state, Right(m))
     }
   }

@@ -1,13 +1,13 @@
 package org.zynque.tyriancombinators.elements
 
-import org.zynque.tyriancombinators.data.DataComponent
-import org.zynque.tyriancombinators.view.ViewComponent
+import org.zynque.tyriancombinators.data.DataElement
+import org.zynque.tyriancombinators.view.ViewElement
 
 // F: Effect Type (Cats Effect or ZIO Task)
 // I: Input, O: Output, S: State/Model, M: Message
-trait TyrianComponent[F[_], I, O, M, S] extends DataComponent[F, I, O, M, S] with ViewComponent[M, S]
+trait TyrianElement[F[_], I, O, M, S] extends DataElement[F, I, O, M, S] with ViewElement[M, S]
 
-// todo: read and re-read this: https://dev.to/dwayne/stateless-and-stateful-components-no-reusable-views-in-elm-2kg0
+// todo: read and re-read this: https://dev.to/dwayne/stateless-and-stateful-elements-no-reusable-views-in-elm-2kg0
 //       compare with what we're trying to do here
 //
 //       also compare/contrast using purely functional streams as in/out ports
