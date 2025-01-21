@@ -12,7 +12,8 @@ lazy val commonSettings: Seq[sbt.Def.Setting[?]] = Seq(
   scalafixOnCompile := true,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
-  autoAPIMappings   := true
+  autoAPIMappings   := true,
+  scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
 )
 
 lazy val tyriancombinators =
