@@ -5,17 +5,15 @@ import tyrian.*
 import tyrian.Html.*
 
 object TextInput:
-  type Msg = String
-
   class Element[F[_]](initialValue: String)
-      extends SimpleStatePropagatorElement[F, Msg, Msg]:
+      extends SimpleStatePropagatorElement[F, String, String]:
 
     def initSimple = initialValue
 
-    def updateSimple(state: Msg, message: Msg): Msg =
+    def updateSimple(state: String, message: String): String =
       message
 
-    def view(state: Msg): Html[Msg] =
+    def view(state: String): Html[String] =
       input(
         `type` := "text",
         value := state.toString,

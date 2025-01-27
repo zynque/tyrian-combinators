@@ -11,7 +11,7 @@ def heterogeneousListExample[F[_]] = {
   val text2 = TextInput.Element[F]("Input 2")
   val counter = CounterButton.Element[F]("Counter")
 
-  val combined = Combiner[F].combineElements((text1, text2, counter)) {
+  val combined = Combiner[F]().CombineElements((text1, text2, counter)) {
     case (t1, t2, c) =>
       div(
         t1,
