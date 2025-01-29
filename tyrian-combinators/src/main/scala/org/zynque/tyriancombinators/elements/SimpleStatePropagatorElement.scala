@@ -7,6 +7,7 @@ trait SimpleStatePropagatorElement[F[_], M, S] extends TyrianElement[F, Nothing,
   def updateSimple(state: S, message: M): S
   def init: (S, Cmd[F, M]) = (initSimple, Cmd.None)
   def update(state: S, value: Either[Nothing, M]): (S, Cmd[F, Either[S, M]]) =
+    println("handling update: " + value)
     value match
       case Right(m) =>
         val newState = updateSimple(state, m)

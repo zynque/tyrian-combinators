@@ -17,4 +17,5 @@ object Label:
       input
 
     def view(state: State): Html[Nothing] =
+      println("Label: viewing state: " + state)
       div(state)

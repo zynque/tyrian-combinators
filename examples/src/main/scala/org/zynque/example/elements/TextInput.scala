@@ -17,5 +17,5 @@ object TextInput:
       input(
         `type` := "text",
         value := state.toString,
-        onChange(identity)
+        onInput(identity)
       )

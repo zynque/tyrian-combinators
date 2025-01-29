@@ -6,6 +6,7 @@
   },
   "devDependencies": {
     "@parcel/reporter-bundle-analyzer": "^2.13.0",
-    "parcel": "^2.1.0"
+    "parcel": "^2.1.0",
+    "process": "^0.11.10"
   }
 }

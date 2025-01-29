@@ -5,11 +5,21 @@ import org.zynque.tyriancombinators.extensions.TyrianElementExtensions.*
 import tyrian.*
 import tyrian.Html.*
 
+def textInputExample[F[_]] = {
+  val text = TextInput.Element[F]("Input")
+  val label = Label.Element[F]("Label")
+  text.feedInto(label, (textView, labelView) => div(textView, labelView))
+}
+
 def heterogeneousListExample[F[_]] = {
-  // case class Inputs(text1: String, text2: String, counter: Int)
-  val text1 = TextInput.Element[F]("Input 1")
-  val text2 = TextInput.Element[F]("Input 2")
-  val counter = CounterButton.Element[F]("Counter")
+  enum ExampleUpdate:
+    case Input1(value: String)
+    case Input2(value: String)
+    case Counter(value: Int)
+
+  val text1 = TextInput.Element[F]("Input 1").mapOutput(ExampleUpdate.Input1.apply)
+  val text2 = TextInput.Element[F]("Input 2").mapOutput(ExampleUpdate.Input2.apply)
+  val counter = CounterButton.Element[F]("Counter").mapOutput(ExampleUpdate.Counter.apply)
 
   val combined = Combiner[F]().CombineElements((text1, text2, counter)) {
     case (t1, t2, c) =>

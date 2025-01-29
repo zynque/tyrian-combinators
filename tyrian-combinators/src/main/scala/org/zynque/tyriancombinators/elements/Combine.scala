@@ -3,148 +3,160 @@ package org.zynque.tyriancombinators.elements
 import tyrian.Html
 import tyrian.Cmd
 
-type InputTypes[T <: Tuple] = T match {
-  case TyrianElement[_, i, _, _, _] *: EmptyTuple => i
-  case TyrianElement[_, i, _, _, _] *: tail => Either[i, InputTypes[tail]]
-  case _                                    => Nothing
-}
-
-type OutputTypes[T <: Tuple] = T match {
-  case TyrianElement[_, _, o, _, _] *: EmptyTuple => o
-  case TyrianElement[_, _, o, _, _] *: tail => Either[o, OutputTypes[tail]]
-  case _                                    => Nothing
-}
-
-type MessageTypes[T <: Tuple] = T match {
-  case TyrianElement[_, _, _, m, _] *: EmptyTuple => m
-  case TyrianElement[_, _, _, m, _] *: tail => Either[m, MessageTypes[tail]]
-  case _                                    => Nothing
-}
-
-type StateTypes[T <: Tuple] = T match {
-  case TyrianElement[_, _, _, _, s] *: EmptyTuple => s *: EmptyTuple
-  case TyrianElement[_, _, _, _, s] *: tail => s *: StateTypes[tail]
-  case _ => Nothing
-}
-
-type HtmlTypesHelper[AllMessages, T <: Tuple] = T match {
-  case EmptyTuple => EmptyTuple
-  case TyrianElement[_, _, _, _, _] *: tail =>
-    Html[AllMessages] *: HtmlTypesHelper[AllMessages, tail]
-  case _ => Nothing
-}
-
-type HtmlTypes[T <: Tuple] = HtmlTypesHelper[MessageTypes[T], T]
-
 class Combiner[F[_]] {
-  def CombineElements[T <: Tuple](elements: T)(
+  def CombineElements[T <: Tuple, I, O](
+      elements: T
+  )( // todo: Something like (using ev: CompatibleElementTuple[T, F, I, O])(
       f: HtmlTypes[T] => Html[MessageTypes[T]]
-  ) : TyrianElement[F, InputTypes[T], OutputTypes[T], MessageTypes[
-        T
-      ], StateTypes[T]] 
-      = new TyrianElement[F, InputTypes[T], OutputTypes[T], MessageTypes[
-        T
-      ], StateTypes[T]] {
-    def init: (StateTypes[T], Cmd[F, MessageTypes[T]]) =
-      val initialStatesAndCommandsList = elements.productIterator.map { e =>
-        e.asInstanceOf[TyrianElement[F, ?, ?, ?, ?]].init
-      }
-      val initialStates   = initialStatesAndCommandsList.map(_._1).toArray[Any]
-      val initialCommands = initialStatesAndCommandsList.map(_._2).toArray[Any]
-      val initialStatesTuple =
-        Tuple.fromArray(initialStates).asInstanceOf[StateTypes[T]]
-      val initialCommandsTuple = initialCommands.foldLeft(
-        Cmd.None.asInstanceOf[Cmd[F, MessageTypes[T]]]
-      )((cmds, cmd) => cmds |+| cmd.asInstanceOf[Cmd[F, MessageTypes[T]]])
-      (initialStatesTuple, initialCommandsTuple)
-    def update(
-        state: StateTypes[T],
-        value: Either[InputTypes[T], MessageTypes[T]]
-    ): (StateTypes[T], Cmd[F, Either[OutputTypes[T], MessageTypes[T]]]) =
-      val rawStates = state.asInstanceOf[Tuple].productIterator
-      val result = value match {
-        case Left(input) =>
-          dispatchInput(elements, rawStates, input)
-        case Right(message) =>
-          dispatchMessage(elements, rawStates, message)
-      }
-      result
-    def view(state: StateTypes[T]): Html[MessageTypes[T]] =
-      val rawStates = state.asInstanceOf[Tuple].productIterator
-      val htmls = elements.productIterator.zip(rawStates).foldLeft(
-        List.empty[Any]
-      ) {
-        case (acc, (e, s)) =>
-          val html = e.asInstanceOf[TyrianElement[F, ?, ?, ?, ?]].view(s.asInstanceOf)
-          html :: acc
-      }.reverse
-      val htmlsTuple = Tuple.fromArray(htmls.toArray).asInstanceOf[HtmlTypes[T]]
-      f(htmlsTuple)
+  ): TyrianElement[F, I, O, MessageTypes[T], StateTypes[T]] =
+    new TyrianElement[F, I, O, MessageTypes[T], StateTypes[T]] {
+      def init: (StateTypes[T], Cmd[F, MessageTypes[T]]) =
+        val initialStatesAndCommandsList = elements.productIterator.map { e =>
+          e.asInstanceOf[TyrianElement[F, ?, ?, ?, ?]].init
+        }
+        val initialStates = initialStatesAndCommandsList.map(_._1).toArray[Any]
+        val initialCommands =
+          initialStatesAndCommandsList.map(_._2).toArray[Any]
+        val initialStatesTuple =
+          Tuple.fromArray(initialStates).asInstanceOf[StateTypes[T]]
+        val initialCommandsTuple = initialCommands.foldLeft(
+          Cmd.None.asInstanceOf[Cmd[F, MessageTypes[T]]]
+        )((cmds, cmd) => cmds |+| cmd.asInstanceOf[Cmd[F, MessageTypes[T]]])
+        println("initialStatesTuple: " + initialStatesTuple)
+        (initialStatesTuple, initialCommandsTuple)
+      def update(
+          state: StateTypes[T],
+          value: Either[I, MessageTypes[T]]
+      ): (StateTypes[T], Cmd[F, Either[O, MessageTypes[T]]]) =
+        val rawStates = state.asInstanceOf[Tuple].productIterator
+        val result = value match {
+          case Left(input) =>
+            println("Dispatching input: " + input)
+            // throw new Exception("broke here")
+            dispatchInput(elements, rawStates, input)
+          case Right(message) =>
+            println("Dispatching message: " + message)
+            // throw new Exception("broke here")
+            dispatchMessage(elements, rawStates, message)
+        }
+        println("result: " + result)
+        result
+      def view(state: StateTypes[T]): Html[MessageTypes[T]] =
+        println("A viewing states:" + state)
+        val rawStates = state.asInstanceOf[Tuple].productIterator
+        val htmls = elements.productIterator
+          .zip(rawStates)
+          .foldLeft(
+            (List.empty[Any], (a: Any) => Left(a).asInstanceOf[Any])
+          ) { case ((htmls, msgWrapper), (e, s)) =>
+            val html =
+              e.asInstanceOf[TyrianElement[F, ?, ?, ?, ?]].view(s.asInstanceOf)
+            val html2 = html.map(msgWrapper)
+            val msgWrapper2 = (msg: Any) => Right(msgWrapper(msg))
+            (html2 :: htmls, msgWrapper2)
+          }
+          ._1.reverse
+        val htmlsTuple =
+          Tuple.fromArray(htmls.toArray).asInstanceOf[HtmlTypes[T]]
+        println("B viewing states:" + state)
+        f(htmlsTuple)
     }
 
-  def dispatchInput[T <: Tuple](
+  def dispatchInput[T <: Tuple, I, O](
       elements: T,
       states: Iterator[Any],
-      input: InputTypes[T]): (StateTypes[T], Cmd[F, Either[OutputTypes[T], MessageTypes[T]]]) = {
-          input match {
-            case Left(i) =>
-              val (state, cmd) = elements.productElement(0).asInstanceOf[TyrianElement[F,?, ?, ?, ?]].update(states.next.asInstanceOf, Left(i.asInstanceOf))
-              val cmdb = cmd.map {
-                case Left(o) => Left(Left(o))
-                case Right(m) => Right(Left(m))
-              }
-              (state, cmdb)
-            case Right(ii) =>
-              ???
+      input: I
+  ): (StateTypes[T], Cmd[F, Either[O, MessageTypes[T]]]) = {
+    val results = elements.productIterator.zip(states).map { case (e, s) =>
+      e.asInstanceOf[TyrianElement[F, I, O, ?, ?]]
+        .update(s.asInstanceOf, Left(input))
+    }
+    val newStates = results.map(_._1).toArray[Any]
+    val commands = results
+      .map(_._2)
+      .foldLeft(
+        Cmd.None.asInstanceOf[Cmd[F, Either[O, MessageTypes[T]]]]
+      )((cmds, cmd) =>
+        cmds |+| cmd.asInstanceOf[Cmd[F, Either[O, MessageTypes[T]]]]
+      )
+    (Tuple.fromArray(newStates).asInstanceOf[StateTypes[T]], commands)
+  }
+
+  def dispatchMessage[T <: Tuple, I, O](
+      elements: T,
+      states: Iterator[Any],
+      message: MessageTypes[T]
+  ): (StateTypes[T], Cmd[F, Either[O, MessageTypes[T]]]) = {
+    message match {
+      case Left(m) =>
+        println("found left of message")
+        try {
+          val (state, cmd) = elements
+            .productElement(0)
+            .asInstanceOf[TyrianElement[F, I, O, FirstMessageType[T], FirstStateType[T]]]
+            .update(states.next.asInstanceOf[FirstStateType[T]], Right(m.asInstanceOf[FirstMessageType[T]]))
+          println("performed update on first element")
+          val cmdb = cmd.map {
+            case Left(o)  => Left(o)
+            case Right(m) => Right(Left(m))
           }
-          ???
-      }
-
-  def dispatchMessage[T <: Tuple](
-      elements: T,
-      states: Iterator[Any],
-      message: MessageTypes[T]): (StateTypes[T], Cmd[F, Either[OutputTypes[T], MessageTypes[T]]]) = {
-        message match {
-          case Left(m) =>
-            val (state, cmd) = elements.productElement(0).asInstanceOf[TyrianElement[F,?, ?, ?, ?]].update(states.next.asInstanceOf, Right(m.asInstanceOf))
-            val cmdb = cmd.map {
-              case Left(o) => Left(Left(o))
-              case Right(m) => Right(Left(m))
-            }
-            (state, cmdb)
-          case Right(mm) =>
-            ???
+          val newStates = Tuple.fromArray((state :: states.toList.tail).toArray)
+          println("new states: " + newStates)
+          (newStates.asInstanceOf[StateTypes[T]], cmdb.asInstanceOf[Cmd[F, Either[O, MessageTypes[T]]]])
+        } catch {
+          case e: Exception => println(e); throw e;
         }
-        ???
-      }
-  
-  def indexToEither[T <: Tuple, M](index: Int, value: M)(using ev: MessageTypes[T]): MessageTypes[T] = {
-    // if (index == 0) Left(value)
-    // else Right(indexToEitherHelper(index - 1, value))
-    ???
+      case Right(m2) =>
+        println("found right of message")
+        val theTail = Tuple.fromArray(elements.productIterator.toList.tail.toArray)
+        val (newStates, cmd) = dispatchMessage(theTail, states, m2.asInstanceOf)
+        val cmdb = cmd.map {
+          case Left(o)  => Left(o)
+          case Right(m) => Right(Right(m))
+        }
+        (newStates.asInstanceOf, cmdb.asInstanceOf)
+      case m3 =>
+        println("found neither left nor right of message")
+        println("m3: " + m3)
+        val (state, cmd) = elements
+          .productElement(0)
+          .asInstanceOf[TyrianElement[F, I, O, ?, ?]]
+          .update(states.next.asInstanceOf, Right(m3.asInstanceOf))
+        val cmdb = cmd.map {
+          case Left(o)  => Left(o)
+          case Right(m) => Right(Left(m))
+        }
+        val newStates = Tuple.fromArray((state :: states.toList.tail).toArray)
+        println("new states: " + newStates)
+        (newStates.asInstanceOf, cmdb.asInstanceOf)
+    }
   }
 
-  def indexToEitherHelper[T](index: Int, value: T): T = {
-    // if (index == 0) value
-    // else Right(indexToEitherHelper(index - 1, value))
-    ???
-  }
+  // def indexToEither[T <: Tuple, M](index: Int, value: M)(using
+  //     ev: MessageTypes[T]
+  // ): MessageTypes[T] =
+  //   // if (index == 0) Left(value)
+  //   // else Right(indexToEitherHelper(index - 1, value))
+  //   ???
 
-  def indexOfEither[T <: Tuple](either: MessageTypes[T]): Int = {
-    // either match {
-    //   case Left(_) => 0
-    //   case Right(m:MessageTypes[Tuple.Tail[T]]) => indexOfEitherHelper[Tuple.Tail[T], MessageTypes[Tuple.Tail[T]]](1, m)
-    //   case _ => 0
-    // }
-    ???
-  }
-  
-  def indexOfEitherHelper[T <: Tuple, M](i: Int, either: MessageTypes[T]): Int = {
-    // either match {
-    //   case Left(_) => i
-    //   case Right(m:MessageTypes[Tuple.Tail[T]]) => indexOfEitherHelper[Tuple.Tail[T], M](1, m)
-    //   case _ => i
-    // }
-    ???
-  }
+  // def indexToEitherHelper[T](index: Int, value: T): T =
+  //   // if (index == 0) value
+  //   // else Right(indexToEitherHelper(index - 1, value))
+  //   ???
+
+  // def indexOfEither[T <: Tuple](either: MessageTypes[T]): Int =
+  //   // either match {
+  //   //   case Left(_) => 0
+  //   //   case Right(m:MessageTypes[Tuple.Tail[T]]) => indexOfEitherHelper[Tuple.Tail[T], MessageTypes[Tuple.Tail[T]]](1, m)
+  //   //   case _ => 0
+  //   // }
+  //   ???
+
+  // def indexOfEitherHelper[T <: Tuple, M](i: Int, either: MessageTypes[T]): Int =
+  //   // either match {
+  //   //   case Left(_) => i
+  //   //   case Right(m:MessageTypes[Tuple.Tail[T]]) => indexOfEitherHelper[Tuple.Tail[T], M](1, m)
+  //   //   case _ => i
+  //   // }
+  //   ???
 }

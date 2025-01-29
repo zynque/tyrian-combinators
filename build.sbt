@@ -1,15 +1,15 @@
 Global / onChangedBuildSource := ReloadOnSourceChanges
 ThisBuild / versionScheme     := Some("early-semver")
-ThisBuild / scalaVersion      := "3.4.1"
+ThisBuild / scalaVersion      := "3.6.2"
 ThisBuild / organization      := "org.zynque"
 ThisBuild / version           := "0.0.1"
 
 lazy val commonSettings: Seq[sbt.Def.Setting[?]] = Seq(
   libraryDependencies ++= Seq(
-    "io.indigoengine" %%% "tyrian" % "0.11.0"
+    "io.indigoengine" %%% "tyrian" % "0.12.0"
   ),
   scalacOptions ++= Seq("-language:strictEquality"),
-  scalafixOnCompile := true,
+  // scalafixOnCompile := true,
   semanticdbEnabled := true,
   semanticdbVersion := scalafixSemanticdb.revision,
   autoAPIMappings   := true,
@@ -35,7 +35,7 @@ lazy val examples =
       name := "examples",
       commonSettings,
       libraryDependencies ++= Seq(
-        "io.indigoengine" %%% "tyrian-zio"       % "0.11.0",
+        "io.indigoengine" %%% "tyrian-zio"       % "0.12.0",
         "dev.zio"         %%% "zio-interop-cats" % "23.1.0.3"
       ),
       publish / skip      := true,
