@@ -21,7 +21,11 @@ def heterogeneousListExample[F[_]] = {
   val text2 = TextInput.Element[F]("Input 2").mapOutput(ExampleUpdate.Input2.apply)
   val counter = CounterButton.Element[F]("Counter").mapOutput(ExampleUpdate.Counter.apply)
 
-  val combined = Combiner[F]().CombineElements((text1, text2, counter)) {
+  // val combined = Combiner().CombineElements(text1 *: EmptyTuple) {
+  //   ???
+  // }
+
+  val combined = Combiner().CombineElements((text1, text2, counter)) {
     case (t1, t2, c) =>
       div(
         t1,
@@ -30,7 +34,7 @@ def heterogeneousListExample[F[_]] = {
       )
   }
 
-  val label = Label.Element[F]("Label")
+  val label = Label.Element[F]("Label").mapOutput(a => a)
   val s = combined.mapOutput(_.toString())
   s.feedInto(label, (combinedView, labelView) => div(combinedView, labelView))
 }
