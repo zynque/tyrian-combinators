@@ -5,33 +5,21 @@ import tyrian.Cmd
 
 // idea: Use lens instances to tell combiner how to construct combined messages & combined state?
 
-def states[F[_], I, O, T <: Tuple](
-    elements: T
-)(using ev: CompatibleElements[F, I, O, T]): StateTypes[T] = ???
-
-def messages[F[_], I, O, T <: Tuple](
-    elements: T
-): MessageTypes[F, I, O, T] = ???
-
-def htmls[F[_], I, O, T <: Tuple](
-    elements: T
-): HtmlTypes[F, I, O, T] = ???
-
 def combineElements[F[_], I, O, T <: Tuple](
     elements: T
 )(using ev: CompatibleElements[F, I, O, T])(
-    f: HtmlTypes[F, I, O, T] => Html[MessageTypes[F, I, O, T]]
-): TyrianElement[F, I, O, MessageTypes[F, I, O, T], StateTypes[T]] =
-  new TyrianElement[F, I, O, MessageTypes[F, I, O, T], StateTypes[T]] {
+    f: HtmlTypes[T] => Html[CombinedMessage]
+): TyrianElement[F, I, O, CombinedMessage, StateTypes[T]] =
+  new TyrianElement[F, I, O, CombinedMessage, StateTypes[T]] {
 
-  def init: (StateTypes[T], Cmd[F, MessageTypes[F, I, O, T]]) =
+  def init: (StateTypes[T], Cmd[F, CombinedMessage]) =
     val initialStatesAndCommandsList = elements.productIterator.map { e =>
       e.asInstanceOf[TyrianElement[F, I, O, ?, ?]].init
     }
     val initialStates = initialStatesAndCommandsList.map(_._1).toVector
     val initialCommands = initialStatesAndCommandsList.map(_._2).zipWithIndex
     val initialCommandsCombined = initialCommands.foldLeft(
-      Cmd.None.asInstanceOf[Cmd[F, MessageTypes[F, I, O, T]]]
+      Cmd.None.asInstanceOf[Cmd[F, CombinedMessage]]
     ){
       case (cmds, (cmd, index)) =>
       cmds |+| cmd.asInstanceOf[Cmd[F, Any]].map(c => (index, c))
@@ -42,8 +30,8 @@ def combineElements[F[_], I, O, T <: Tuple](
     (initialStatesTuple, initialCommandsCombined)
   def update(
       state: StateTypes[T],
-      value: Either[I, MessageTypes[F, I, O, T]]
-  ): (StateTypes[T], Cmd[F, Either[O, MessageTypes[F, I, O, T]]]) =
+      value: Either[I, CombinedMessage]
+  ): (StateTypes[T], Cmd[F, Either[O, CombinedMessage]]) =
     val result = value match {
       case Left(input) =>
         println("Dispatching input: " + input)
@@ -56,7 +44,7 @@ def combineElements[F[_], I, O, T <: Tuple](
     }
     println("result: " + result)
     result
-  def view(state: StateTypes[T]): Html[MessageTypes[F, I, O, T]] =
+  def view(state: StateTypes[T]): Html[CombinedMessage] =
     println("A viewing states:" + state)
     val htmls = elements.productIterator
       .zip(state.asInstanceOf[Tuple].productIterator)
@@ -70,7 +58,7 @@ def combineElements[F[_], I, O, T <: Tuple](
         html2 :: htmls
       }
     val htmlsTuple =
-      Tuple.fromArray(htmls.toArray).asInstanceOf[HtmlTypes[F, I, O, T]]
+      Tuple.fromArray(htmls.toArray).asInstanceOf[HtmlTypes[T]]
     println("B viewing states:" + state)
     f(htmlsTuple)
 
@@ -78,7 +66,7 @@ def combineElements[F[_], I, O, T <: Tuple](
       elements: T,
       states: StateTypes[T],
       input: I
-  ): (StateTypes[T], Cmd[F, Either[O, MessageTypes[F, I, O, T]]]) = {
+  ): (StateTypes[T], Cmd[F, Either[O, CombinedMessage]]) = {
     val statesIterator = states.asInstanceOf[Tuple].productIterator
     val results = elements.productIterator.zip(statesIterator).map { case (e, s) =>
       e.asInstanceOf[TyrianElement[F, I, O, ?, ?]]
@@ -88,9 +76,9 @@ def combineElements[F[_], I, O, T <: Tuple](
     val commands = results
       .map(_._2)
       .foldLeft(
-        Cmd.None.asInstanceOf[Cmd[F, Either[O, MessageTypes[F, I, O, T]]]]
+        Cmd.None.asInstanceOf[Cmd[F, Either[O, CombinedMessage]]]
       )((cmds, cmd) =>
-        cmds |+| cmd.asInstanceOf[Cmd[F, Either[O, MessageTypes[F, I, O, T]]]]
+        cmds |+| cmd.asInstanceOf[Cmd[F, Either[O, CombinedMessage]]]
       )
     (Tuple.fromArray(newStates).asInstanceOf[StateTypes[T]], commands)
   }
@@ -98,8 +86,8 @@ def combineElements[F[_], I, O, T <: Tuple](
   def dispatchMessage[T <: Tuple, I, O](
       elements: T,
       states: StateTypes[T],
-      message: MessageTypes[F, I, O, T]
-  ): (StateTypes[T], Cmd[F, Either[O, MessageTypes[F, I, O, T]]]) = {
+      message: CombinedMessage
+  ): (StateTypes[T], Cmd[F, Either[O, CombinedMessage]]) = {
     val (index, m) = message
     println(s"dispatching with i: ${index} and m: ${m}")
     val element =
@@ -117,7 +105,7 @@ def combineElements[F[_], I, O, T <: Tuple](
     val newStates = statesArray.updated(index, newState)
     (
       Tuple.fromArray(newStates.toArray).asInstanceOf[StateTypes[T]],
-      cmdb.asInstanceOf[Cmd[F, Either[O, MessageTypes[F, I, O, T]]]]
+      cmdb.asInstanceOf[Cmd[F, Either[O, CombinedMessage]]]
     )
   }
 }

@@ -16,10 +16,3 @@ object CompatibleElements {
   ): CompatibleElements[F, I, O, TyrianElement[F, I, O, M, S] *: T] =
     new CompatibleElements[F, I, O, TyrianElement[F, I, O, M, S] *: T] {}
 }
-
-type CompatibleElements2[F[_], I, O, T <: Tuple] = T match {
-  case EmptyTuple => true
-  case TyrianElement[F, I, O, ?, ?] *: rest =>
-    CompatibleElements2[F, I, O, rest]
-  case _ => false
-}

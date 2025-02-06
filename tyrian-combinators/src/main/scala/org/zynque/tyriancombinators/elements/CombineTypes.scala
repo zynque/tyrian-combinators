@@ -2,16 +2,14 @@ package org.zynque.tyriancombinators.elements
 
 import tyrian.Html
 
-type MessageTypes[F[_], I, O, T <: Tuple] = (Int, Any) // CombinedMessage[F, I, O, T, ?]
+type CombinedMessage = (Int, Any)
 
-type HtmlTypesHelper[AllMessages, T <: Tuple] = T match {
+type HtmlTypes[T <: Tuple] = T match {
   case EmptyTuple => EmptyTuple
   case TyrianElement[_, _, _, _, _] *: tail =>
-    Html[AllMessages] *: HtmlTypesHelper[AllMessages, tail]
+    Html[CombinedMessage] *: HtmlTypes[tail]
   case _ => Nothing
 }
-
-type HtmlTypes[F[_], I, O, T <: Tuple] = HtmlTypesHelper[MessageTypes[F, I, O, T], T]
 
 type StateTypes[T <: Tuple] = T match {
   case EmptyTuple => EmptyTuple
