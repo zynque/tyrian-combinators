@@ -13,7 +13,7 @@ def DemoApp[F[_]] =
       textInputExample[F],
       (h1, h2) => div(h1, h2)
     )
-    // .pairWith(
-    //   heterogeneousListExample[F],
-    //   (h1, h2) => div(h1, h2)
-    // )
+    .pairWith(
+      heterogeneousListExample[F],
+      (h1, h2) => div(h1, h2)
+    )

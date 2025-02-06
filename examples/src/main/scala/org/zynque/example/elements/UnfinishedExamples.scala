@@ -8,7 +8,8 @@ import tyrian.Html.*
 def textInputExample[F[_]] = {
   val text = TextInput.Element[F]("Input")
   val label = Label.Element[F]("Label")
-  text.feedInto(label, (textView, labelView) => div(textView, labelView))
+  val result = text.feedInto(label, (textView, labelView) => div(textView, labelView))
+  result
 }
 
 def heterogeneousListExample[F[_]] = {
@@ -40,11 +41,17 @@ def heterogeneousListExample[F[_]] = {
       )
   }
 
-  val combinedAsString = combined.mapOutput(_.toString())
+  val combinedAsString = combined.mapOutput{
+    case ExampleUpdate.Input1(v) => v
+    case ExampleUpdate.Input2(v) => v
+    case ExampleUpdate.Counter(c) => c.toString()
+  }
 
-  val label = Label.Element[F]("Label").mapOutput(a => a)
+  val label = Label.Element[F]("Label")
 
-  combinedAsString.feedInto(label, (combinedView, labelView) => div(combinedView, labelView))
+  val result = combinedAsString.feedInto(label, (combinedView, labelView) => div(combinedView, labelView))
+
+  result
 
   // text0.feedInto(label, (textView, labelView) => div(textView, labelView))
 }

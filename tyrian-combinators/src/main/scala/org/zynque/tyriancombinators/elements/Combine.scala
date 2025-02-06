@@ -21,20 +21,20 @@ def combineElements[F[_], I, O, T <: Tuple](
     elements: T
 )(using ev: CompatibleElements[F, I, O, T])(
     f: HtmlTypes[F, I, O, T] => Html[MessageTypes[F, I, O, T]]
-) = new TyrianElement[F, I, O, MessageTypes[F, I, O, T], StateTypes[T]] {
+): TyrianElement[F, I, O, MessageTypes[F, I, O, T], StateTypes[T]] =
+  new TyrianElement[F, I, O, MessageTypes[F, I, O, T], StateTypes[T]] {
 
   def init: (StateTypes[T], Cmd[F, MessageTypes[F, I, O, T]]) =
     val initialStatesAndCommandsList = elements.productIterator.map { e =>
-      e.asInstanceOf[TyrianElement[F, ?, ?, ?, ?]].init
+      e.asInstanceOf[TyrianElement[F, I, O, ?, ?]].init
     }
     val initialStates = initialStatesAndCommandsList.map(_._1).toVector
-    val initialCommands =
-      initialStatesAndCommandsList.map(_._2).zipWithIndex
+    val initialCommands = initialStatesAndCommandsList.map(_._2).zipWithIndex
     val initialCommandsCombined = initialCommands.foldLeft(
       Cmd.None.asInstanceOf[Cmd[F, MessageTypes[F, I, O, T]]]
     ){
       case (cmds, (cmd, index)) =>
-      cmds |+| cmd.asInstanceOf[Cmd[F, ElementAt[T, F, I, O, index.type]#M]].map(c => CombinedMessage(index, c))
+      cmds |+| cmd.asInstanceOf[Cmd[F, Any]].map(c => (index, c))
     }
     println("initialStates: " + initialStates)
     val initialStatesTuple =
@@ -100,13 +100,13 @@ def combineElements[F[_], I, O, T <: Tuple](
       states: StateTypes[T],
       message: MessageTypes[F, I, O, T]
   ): (StateTypes[T], Cmd[F, Either[O, MessageTypes[F, I, O, T]]]) = {
-    val index = message.index
-    println(s"dispatching with i: ${index} and m: ${message.message}")
+    val (index, m) = message
+    println(s"dispatching with i: ${index} and m: ${m}")
     val element =
       elements.productElement(index).asInstanceOf[TyrianElement[F, I, O, ElementAt[T, F, I, O, index.type]#M, ElementAt[T, F, I, O, index.type]#S]]
     val state           = states.asInstanceOf[Tuple].productElement(index).asInstanceOf[ElementAt[T, F, I, O, index.type]#S]
     println("calling update on element")
-    val typedMessage = message.message.asInstanceOf[ElementAt[T, F, I, O, index.type]#M]
+    val typedMessage = m.asInstanceOf[ElementAt[T, F, I, O, index.type]#M]
     val (newState, cmd) = element.update(state, Right(typedMessage))
     println("update called on element")
     val cmdb = cmd.map {
