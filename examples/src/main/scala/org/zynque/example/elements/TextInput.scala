@@ -16,6 +16,6 @@ object TextInput:
     def view(state: String): Html[String] =
       input(
         `type` := "text",
-        value := state.toString,
+        placeholder := state.toString,
         onInput(identity)
       )

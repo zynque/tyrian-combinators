@@ -10,7 +10,7 @@ def toggleExample[F[_]] = {
   val showA = ButtonElement.Element[F]("Show A")
   val showB = ButtonElement.Element[F]("Show B")
   val selector = showA
-    .pairWith(showB, (a, b) => div(a, b))
+    .pairWith(showB){(a, b) => div(a, b)}
     .mapOutput {
       case Left(_)  => true
       case Right(_) => false
@@ -22,7 +22,7 @@ def toggleExample[F[_]] = {
     case false => "B Selected"
   })
 
-  val toggleAndLabel = toggle.pairWith(label, (a, b) => div(a, b))
+  val toggleAndLabel = toggle.pairWith(label){(a, b) => div(a, b)}
 
   selector.duplicate.feedInto(
     toggleAndLabel,

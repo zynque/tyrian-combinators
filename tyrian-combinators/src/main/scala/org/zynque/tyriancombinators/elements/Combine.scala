@@ -57,6 +57,7 @@ def combineElements[F[_], I, O, T <: Tuple](
         val html2 = html.map(msg => (i, msg))
         html2 :: htmls
       }
+      .reverse
     val htmlsTuple =
       Tuple.fromArray(htmls.toArray).asInstanceOf[HtmlTypes[T]]
     println("B viewing states:" + state)
