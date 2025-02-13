@@ -24,10 +24,3 @@ object CounterButton:
         div(state.toString)
       )
 
-object ButtonElement:
-  enum Msg:
-    case Clicked
-
-  class Element[F[_]](label: String) extends ProducerElement[F, Msg]:
-    def view(state: Unit): Html[Msg] =
-      button(onClick(Msg.Clicked))(label)

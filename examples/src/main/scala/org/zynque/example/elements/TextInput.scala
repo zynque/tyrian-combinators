@@ -4,18 +4,17 @@ import org.zynque.tyriancombinators.elements.*
 import tyrian.*
 import tyrian.Html.*
 
-object TextInput:
-  class Element[F[_]](initialValue: String)
-      extends SimpleStatePropagatorElement[F, String, String]:
+class TextInput[F[_]](initialValue: String)
+    extends SimpleStatePropagatorElement[F, String, String]:
 
-    def initSimple = initialValue
+  def initSimple = initialValue
 
-    def updateSimple(state: String, message: String): String =
-      message
+  def updateSimple(state: String, message: String): String =
+    message
 
-    def view(state: String): Html[String] =
-      input(
-        `type` := "text",
-        placeholder := state.toString,
-        onInput(identity)
-      )
+  def view(state: String): Html[String] =
+    input(
+      `type`      := "text",
+      placeholder := state.toString,
+      onInput(identity)
+    )

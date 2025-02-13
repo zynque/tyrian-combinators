@@ -4,18 +4,14 @@ import tyrian.*
 import tyrian.Html.*
 import org.zynque.tyriancombinators.elements.*
 
-object Label:
-  type State = String
-  type Input = String
-  
-  class Element[F[_]](initialText: State)
-      extends ConsumerElement[F, Input, State]:
+class Label[F[_]](initialText: String)
+    extends ConsumerElement[F, String, String]:
 
-    def initialState = initialText
+  def initialState = initialText
 
-    def updateSimple(state: State, input: Input): State =
-      input
+  def updateSimple(state: String, input: String): String =
+    input
 
-    def view(state: State): Html[Nothing] =
-      // println("Label: viewing state") // todo: Investigate why this is being called so many times
-      div(state)
+  def view(state: String): Html[Nothing] =
+    // println("Label: viewing state") // todo: Investigate why this is being called so many times
+    div(state)

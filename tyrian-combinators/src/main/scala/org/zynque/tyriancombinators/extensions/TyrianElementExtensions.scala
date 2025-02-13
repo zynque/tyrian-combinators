@@ -23,8 +23,8 @@ object TyrianElementExtensions {
     ): TyrianElement[F, I, O2, PairMsg[O, M, M2], (S, S2)] =
       FedIntoDataElement[F, I, O, M, S, O2, M2, S2](element, element2)
 
-    def duplicate: TyrianElement[F, I, Either[O, O], M, S] =
-      Duplicated[F, I, O, M, S](element).withView(element.view)
+    def fork: TyrianElement[F, I, Either[O, O], M, S] =
+      Fork[F, I, O, M, S](element).withView(element.view)
 
     def mapOutput[O2](f: O => O2): TyrianElement[F, I, O2, M, S] =
       OutputMapped[F, I, O, M, S, O2](element, f).withView(element.view)

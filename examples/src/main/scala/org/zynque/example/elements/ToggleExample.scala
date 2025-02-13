@@ -7,8 +7,8 @@ import org.zynque.tyriancombinators.extensions.*
 // toggle example
 // two buttons, each, when pressed, reveals a different counter instance
 def toggleExample[F[_]] = {
-  val showA = ButtonElement.Element[F]("Show A")
-  val showB = ButtonElement.Element[F]("Show B")
+  val showA = Button[F]("Show A")
+  val showB = Button[F]("Show B")
   val selector = showA
     .pairWith(showB){(a, b) => div(a, b)}
     .mapOutput {
@@ -17,15 +17,15 @@ def toggleExample[F[_]] = {
     }
   val toggle = Toggle[F]()
 
-  val label = Label.Element[F]("Selected...").contramapInput((b: Boolean) => b match {
+  val label = Label[F]("Selected...").contramapInput((b: Boolean) => b match {
     case true  => "A Selected"
     case false => "B Selected"
   })
 
-  val toggleAndLabel = toggle.pairWith(label){(a, b) => div(a, b)}
+  val toggleAndLabel = toggle.pairWith(label){div(_, _)}
 
-  selector.duplicate.feedInto(
+  selector.fork.feedInto(
     toggleAndLabel,
-    (a, b) => div(a, b)
+    div(_, _)
   )
 }

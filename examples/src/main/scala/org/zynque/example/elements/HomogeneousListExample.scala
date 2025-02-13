@@ -9,8 +9,8 @@ def homogeneousListExample[F[_]] = {
 
   case class TodoListItem(title: String, completed: Boolean)
 
-  val titleInput    = TextInput.Element[F]("Title...")
-  val addItemButton = ButtonElement.Element[F]("Add")
+  val titleInput    = TextInput[F]("Title...")
+  val addItemButton = Button[F]("Add")
 
   val header = titleInput
     .pairWith(addItemButton) { case (input, button) =>

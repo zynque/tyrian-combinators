@@ -2,8 +2,9 @@ package org.zynque.tyriancombinators.data
 
 import tyrian.*
 
-// An element that duplicates its output, emitting it twice, once as a Left and once as a Right
-class Duplicated[F[_], I, O, M, S](
+// An element that "forks" or duplicates its output, emitting it twice, once as a Left and once as a Right
+// The result can be fed into a pair of components so that they can both receive the same output
+class Fork[F[_], I, O, M, S](
     element: DataElement[F, I, O, M, S]
 ) extends DataElement[
       F,

@@ -12,7 +12,7 @@ def sideBySideExample[F[_]] = {
   val withTotalAsString = accumulated.mapOutput { case (a, b) =>
     (a.getOrElse(0) + b.getOrElse(0)).toString
   }
-  val label = Label.Element[F]("(total)")
+  val label = Label[F]("(total)")
   withTotalAsString.feedInto(
     label,
     (a, b) => div(a, b)
