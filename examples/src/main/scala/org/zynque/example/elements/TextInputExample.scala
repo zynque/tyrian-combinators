@@ -5,8 +5,9 @@ import tyrian.*
 import tyrian.Html.*
 
 def textInputExample[F[_]] = {
-  val text = TextInput[F]("Input")
+  val text  = TextInput[F]("Input")
   val label = Label[F]("Label")
-  val result = text.feedInto(label, (textView, labelView) => div(textView, labelView))
+  val result =
+    text.feedInto(label, (textView, labelView) => div(textView, labelView))
   result
 }

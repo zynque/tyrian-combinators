@@ -7,7 +7,10 @@ import tyrian.*
 class FedInto[F[_], I, O, M, S, O2, M2, S2](
     element: TyrianElement[F, I, O, M, S],
     element2: TyrianElement[F, O, O2, M2, S2],
-    combineUI: (Html[PairMsg[O, M, M2]], Html[PairMsg[O, M, M2]]) => Html[PairMsg[O, M, M2]]
+    combineUI: (
+        Html[PairMsg[O, M, M2]],
+        Html[PairMsg[O, M, M2]]
+    ) => Html[PairMsg[O, M, M2]]
 ) extends DataFedInto[F, I, O, M, S, O2, M2, S2](
       element,
       element2

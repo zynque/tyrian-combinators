@@ -19,7 +19,7 @@ class InputContramapped[F[_], I, I2, O, M, S](
       case Right(m) =>
         element.update(state, Right(m))
     }
-  }
+}
 
 // class InputIgnored[F[_], I, O, M, S](
 //     element: DataElement[F, I, O, M, S]

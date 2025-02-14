@@ -16,7 +16,7 @@ def heterogeneousListExample[F[_]] = {
   val text2 =
     TextInput[F]("Input 2").mapOutput(ExampleUpdate.Input2.apply)
   val counter =
-    CounterButton.Element[F]("Counter").mapOutput(ExampleUpdate.Counter.apply)
+    TallyCounter[F]("Counter").mapOutput(ExampleUpdate.Counter.apply)
 
   val elements = (text1, text2, counter)
 

@@ -3,24 +3,16 @@ package org.zynque.example.elements
 import org.zynque.tyriancombinators.elements.*
 import tyrian.*
 import tyrian.Html.*
-import scala.CanEqual.derived
 
-object CounterButton:
-  enum Msg derives CanEqual:
-    case Increment
+class TallyCounter[F[_]](label: String)
+    extends SimpleStatePropagatorElement[F, Unit, Int]:
 
-  class Element[F[_]](label: String)
-      extends SimpleStatePropagatorElement[F, Msg, Int]:
+  def initSimple = 0
 
-    def initSimple = 0
+  def updateSimple(state: Int, message: Unit): Int = state + 1
 
-    def updateSimple(state: Int, message: Msg): Int =
-      message match
-        case Msg.Increment => state + 1
-
-    def view(state: Int): Html[Msg] =
-      div(
-        button(onClick(Msg.Increment))(label),
-        div(state.toString)
-      )
-
+  def view(state: Int): Html[Unit] =
+    div(
+      button(onClick(()))(label),
+      div(state.toString)
+    )

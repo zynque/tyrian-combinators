@@ -14,8 +14,8 @@ class Toggle[F[_]]
       Boolean,
       (Boolean, Int, Int)
     ] {
-  val incA = CounterButton.Element[F]("Inc A").propagateState
-  val incB = CounterButton.Element[F]("Inc B").propagateState
+  val incA = TallyCounter[F]("Inc A").propagateState
+  val incB = TallyCounter[F]("Inc B").propagateState
 
   def init: ((Boolean, Int, Int), Cmd[F, Boolean]) = ((true, 0, 0), Cmd.None)
   def update(

@@ -64,11 +64,13 @@ extension [F[_], I, OA, OB, M, S](
     element: TyrianElement[F, I, Either[OA, OB], M, S]
 ) {
   def eitherAccumulated = element.feedInto(new EitherAccumulator[F, OA, OB])
-  def accumulateAndTrigger = element.feedInto(new AccumulateAndTrigger[F, OA, OB])
+  def accumulateAndTrigger =
+    element.feedInto(new AccumulateAndTrigger[F, OA, OB])
 }
 
 extension [F[_], I, O, M, S](element: TyrianElement[F, I, Option[O], M, S]) {
-  def collectSome: TyrianElement[F, I, O, PairMsg[Option[O], M, Nothing], (S, Unit)] =
+  def collectSome
+      : TyrianElement[F, I, O, PairMsg[Option[O], M, Nothing], (S, Unit)] =
     element.feedInto(SomeCollector())
 }
 
@@ -82,11 +84,15 @@ class MappedViewElement[F[_], I, O, M, S](
   def view(state: S): Html[M] = f(state, element.view(state))
 }
 
-class SomeCollector[F[_], I] extends DataElement[F, Option[I], I, Nothing, Unit] {
+class SomeCollector[F[_], I]
+    extends DataElement[F, Option[I], I, Nothing, Unit] {
   def init: (Unit, Cmd[F, Nothing]) = ((), Cmd.None)
-  def update(state: Unit, value: Either[Option[I], Nothing]): (Unit, Cmd[F, Either[I, Nothing]]) =
+  def update(
+      state: Unit,
+      value: Either[Option[I], Nothing]
+  ): (Unit, Cmd[F, Either[I, Nothing]]) =
     value match {
       case Left(Some(i)) => ((), Cmd.emit(Left(i)))
       case _             => ((), Cmd.None)
     }
-  }
+}

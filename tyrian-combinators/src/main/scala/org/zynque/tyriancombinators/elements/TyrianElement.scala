@@ -5,7 +5,9 @@ import org.zynque.tyriancombinators.view.ViewElement
 
 // F: Effect Type (Cats Effect or ZIO Task)
 // I: Input, O: Output, S: State/Model, M: Message
-trait TyrianElement[F[_], I, O, M, S] extends DataElement[F, I, O, M, S] with ViewElement[M, S]
+trait TyrianElement[F[_], I, O, M, S]
+    extends DataElement[F, I, O, M, S]
+    with ViewElement[M, S]
 
 // todo: read and re-read this: https://dev.to/dwayne/stateless-and-stateful-elements-no-reusable-views-in-elm-2kg0
 //       compare with what we're trying to do here
@@ -38,5 +40,5 @@ trait TyrianElement[F[_], I, O, M, S] extends DataElement[F, I, O, M, S] with Vi
 //   // other libraries in this style include:
 //   // - Slinky
 //   // - Scala.js React
-  
+
 // }
