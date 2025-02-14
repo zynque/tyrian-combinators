@@ -4,26 +4,28 @@ import org.zynque.tyriancombinators.extensions.*
 import tyrian.*
 import tyrian.Html.*
 
+case class TodoListItem(title: String, completed: Boolean)
+
 def homogeneousListExample[F[_]] = {
   // https://www.w3schools.com/howto/howto_js_todolist.asp
-
-  case class TodoListItem(title: String, completed: Boolean)
 
   val titleInput    = TextInput[F]("Title...")
   val addItemButton = Button[F]("Add")
 
-  val header = titleInput
-    .pairWith(addItemButton) { case (input, button) =>
-      div(
-        h2("My To Do List"),
-        input,
-        button
-      )
-    }
-    .accumulateAndTrigger
-    .mapOutput { title =>
-      ListMsg.AddItem(TodoListItem(title, false))
-    }
+  def addItemMessage(title: String) =
+    ListMsg.AddItem(TodoListItem(title, false))
+
+  val header =
+    titleInput
+      .pairWith(addItemButton) { case (input, button) =>
+        div(
+          h2("My To Do List"),
+          input,
+          button
+        )
+      }
+      .accumulateAndTrigger
+      .mapOutput(addItemMessage)
 
   def listView(items: List[TodoListItem]): Html[ListMsg[TodoListItem]] = {
     def itemLabel(item: TodoListItem) =

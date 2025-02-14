@@ -20,3 +20,19 @@ class InputContramapped[F[_], I, I2, O, M, S](
         element.update(state, Right(m))
     }
   }
+
+// class InputIgnored[F[_], I, O, M, S](
+//     element: DataElement[F, I, O, M, S]
+// ) extends DataElement[F, Any, O, M, S] {
+//   override val init: (S, Cmd[F, M]) = element.init
+//   override def update(
+//       state: S,
+//       value: Either[Any, M]
+//   ): (S, Cmd[F, Either[O, M]]) =
+//     value match {
+//       case Left(_) =>
+//         element.update(state, Left(()))
+//       case Right(m) =>
+//         element.update(state, Right(m))
+//     }
+//   }

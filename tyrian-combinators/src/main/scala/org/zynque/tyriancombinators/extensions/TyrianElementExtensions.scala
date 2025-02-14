@@ -54,6 +54,9 @@ object TyrianElementExtensions {
 
     def mapView(f: (S, Html[M]) => Html[M]): TyrianElement[F, I, O, M, S] =
       MappedViewElement(element, f)
+
+    // def ignoreInput: TyrianElement[F, Any, O, M, S] =
+    //   InputIgnored[F, I, O, M, S](element).withView(element.view)
   }
 }
 
