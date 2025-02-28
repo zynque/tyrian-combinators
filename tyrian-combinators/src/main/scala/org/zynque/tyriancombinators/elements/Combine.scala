@@ -23,7 +23,6 @@ def combineElements[F[_], I, O, T <: Tuple](
       ) { case (cmds, (cmd, index)) =>
         cmds |+| cmd.asInstanceOf[Cmd[F, Any]].map(c => (index, c))
       }
-      println("initialStates: " + initialStates)
       val initialStatesTuple =
         Tuple.fromArray(initialStates.toArray[Any]).asInstanceOf[StateTypes[T]]
       (initialStatesTuple, initialCommandsCombined)
@@ -33,35 +32,28 @@ def combineElements[F[_], I, O, T <: Tuple](
     ): (StateTypes[T], Cmd[F, Either[O, CombinedMessage]]) =
       val result = value match {
         case Left(input) =>
-          println("Dispatching input: " + input)
           // throw new Exception("broke here")
           dispatchInput(elements, state, input)
         case Right(message) =>
-          println("Dispatching message: " + message)
           // throw new Exception("broke here")
           dispatchMessage(elements, state, message)
       }
-      println("result: " + result)
       result
     def view(state: StateTypes[T]): Html[CombinedMessage] =
-      println("A viewing states:" + state)
       val htmls = elements.productIterator
         .zip(state.asInstanceOf[Tuple].productIterator)
         .zipWithIndex
         .foldLeft(List.empty[Any]) { case (htmls, ((e, s), i)) =>
-          println("viewing element: " + e)
           val html =
             e.asInstanceOf[
               TyrianElement[F, ?, ?, ?, ElementAt[T, F, I, O, i.type]#S]
             ].view(s.asInstanceOf[ElementAt[T, F, I, O, i.type]#S])
-          println("constructed view")
           val html2 = html.map(msg => (i, msg))
           html2 :: htmls
         }
         .reverse
       val htmlsTuple =
         Tuple.fromArray(htmls.toArray).asInstanceOf[HtmlTypes[T]]
-      println("B viewing states:" + state)
       f(htmlsTuple)
 
     def dispatchInput[T <: Tuple, I, O](
@@ -92,7 +84,6 @@ def combineElements[F[_], I, O, T <: Tuple](
         message: CombinedMessage
     ): (StateTypes[T], Cmd[F, Either[O, CombinedMessage]]) = {
       val (index, m) = message
-      println(s"dispatching with i: ${index} and m: ${m}")
       val element =
         elements
           .productElement(index)
@@ -107,10 +98,8 @@ def combineElements[F[_], I, O, T <: Tuple](
         .asInstanceOf[Tuple]
         .productElement(index)
         .asInstanceOf[ElementAt[T, F, I, O, index.type]#S]
-      println("calling update on element")
       val typedMessage    = m.asInstanceOf[ElementAt[T, F, I, O, index.type]#M]
       val (newState, cmd) = element.update(state, Right(typedMessage))
-      println("update called on element")
       val cmdb = cmd.map {
         case Left(o)  => Left(o)
         case Right(m) => Right(Left((index, m)))

@@ -36,6 +36,7 @@ lazy val examples =
       commonSettings,
       libraryDependencies ++= Seq(
         "io.indigoengine" %%% "tyrian-zio"       % "0.12.0",
+        "io.indigoengine" %%% "tyrian-io"        % "0.12.0",
         "dev.zio"         %%% "zio-interop-cats" % "23.1.0.3"
       ),
       publish / skip      := true,

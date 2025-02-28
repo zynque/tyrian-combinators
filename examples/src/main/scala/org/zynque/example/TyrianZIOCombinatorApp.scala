@@ -1,4 +1,4 @@
-package com.fractaltreehouse.threetyrz
+package org.zynque.example
 
 import zio.*
 import cats.effect.kernel.Async

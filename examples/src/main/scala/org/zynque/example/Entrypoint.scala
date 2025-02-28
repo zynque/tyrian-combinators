@@ -1,8 +1,7 @@
-package com.fractaltreehouse.threetyrz
+package org.zynque.example
 
-import zio.interop.catz.*
 import scala.scalajs.js.annotation.*
 import org.zynque.example.elements.DemoApp
 
-@JSExportTopLevel("ThreeTyrz")
-object ThreeTyrz extends TyrianZIOCombinatorApp(DemoApp)
+@JSExportTopLevel("Example")
+object ThreeTyrz extends TyrianIOCombinatorApp(DemoApp)
