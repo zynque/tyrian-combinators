@@ -1,18 +1,13 @@
 package org.zynque.example.elements
 
-import org.zynque.tyriancombinators.elements.*
+import org.zynque.tyriancombinators.data.*
 import tyrian.*
 import tyrian.Html.*
+import org.zynque.tyriancombinators.extensions.TyrianElementExtensions.*
 
-class TallyCounter[F[_]](label: String)
-    extends SimpleStatePropagatorElement[F, Unit, Int]:
-
-  def initSimple = 0
-
-  def updateSimple(state: Int, message: Unit): Int = state + 1
-
-  def view(state: Int): Html[Unit] =
-    div(
-      button(onClick(()))(label),
-      div(state.toString)
-    )
+object TallyCounter:
+  def apply[F[_]](label: String) =
+    val counter = DataElement.stateTransformer[F, Unit, Int](0)((s, _) => s + 1)
+    val displayedCounter = counter.withView((state: Int) => div(state.toString))
+    val button = Button[F](label)
+    button.feedInto(displayedCounter, div(_, _))

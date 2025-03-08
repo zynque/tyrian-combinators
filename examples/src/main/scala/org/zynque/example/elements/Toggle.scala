@@ -2,7 +2,6 @@ package org.zynque.example.elements
 
 import tyrian.*
 import org.zynque.tyriancombinators.elements.*
-import org.zynque.tyriancombinators.extensions.*
 
 // todo: generalize
 // When input == true, displays first counter, when input == false, displays second counter
@@ -14,8 +13,8 @@ class Toggle[F[_]]
       Boolean,
       (Boolean, Int, Int)
     ] {
-  val incA = TallyCounter[F]("Inc A").propagateState
-  val incB = TallyCounter[F]("Inc B").propagateState
+  val incA = TallyCounter[F]("Inc A")
+  val incB = TallyCounter[F]("Inc B")
 
   def init: ((Boolean, Int, Int), Cmd[F, Boolean]) = ((true, 0, 0), Cmd.None)
   def update(
@@ -31,7 +30,7 @@ class Toggle[F[_]]
   }
   def view(state: (Boolean, Int, Int)): Html[Boolean] = {
     val (b, i1, i2) = state
-    if b then incA.view(i1).map(_ => true)
-    else incB.view(i2).map(_ => false)
+    if b then incA.view(((), i1)).map(_ => true)
+    else incB.view(((), i2)).map(_ => false)
   }
 }

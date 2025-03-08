@@ -44,6 +44,11 @@ sbt fullLinkJS
 npm run build
 ```
 
+* Publish locally for use in another project (while actively developing this project)
+```sh
+sbt publishLocal
+```
+
 TODO:
 * Propagate initialization values somehow
 * Figure out best way to handle animation loop(s) between three.js and tyrian Elements
